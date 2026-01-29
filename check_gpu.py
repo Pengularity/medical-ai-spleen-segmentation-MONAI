@@ -1,7 +1,7 @@
 import torch
 import monai
 
-print(f"--- Diagnostic Système ---")
+print("--- System diagnostic ---")
 print(f"PyTorch version: {torch.__version__}")
 print(f"MONAI version: {monai.__version__}")
 print(f"CUDA available: {torch.cuda.is_available()}")

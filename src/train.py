@@ -6,7 +6,6 @@ from monai.data import CacheDataset, DataLoader, decollate_batch
 from monai.inferers import sliding_window_inference
 from monai.transforms import AsDiscrete
 
-# Importing your custom modules
 from transforms import get_train_transforms, get_val_transforms
 from model import get_model
 from train_utils import get_loss_and_metrics, get_optimizer
@@ -32,19 +31,17 @@ def train():
     loss_function, dice_metric = get_loss_and_metrics()
     optimizer = get_optimizer(model.parameters())
     
-    # Updated Scaler
-    scaler = torch.amp.GradScaler('cuda') 
+    scaler = torch.amp.GradScaler("cuda") 
 
-    # Loading & Best Metric Logic
     model_path = "outputs/best_model.pth"
-    best_metric = -1 # Default
+    best_metric = -1
     
     if os.path.exists(model_path):
-        print(f"--- 🧠 Loading existing knowledge from {model_path} ---")
+        print(f"Loading checkpoint from {model_path}")
         model.load_state_dict(torch.load(model_path, weights_only=True))
         best_metric = -1
     else:
-        print("--- 🆕 No previous model found. Starting from scratch. ---")
+        print("No checkpoint found. Training from scratch.")
 
     # 4. Initialize Weights & Biases (optional: set WANDB_API_KEY to enable logging)
     if os.environ.get("WANDB_API_KEY"):
@@ -52,11 +49,10 @@ def train():
         wandb.init(project="spleen-segmentation", name="3d-unet-v1", resume="allow")
     else:
         wandb.init(project="spleen-segmentation", mode="disabled")
-        print("--- ⚠️ W&B not configured. Training in local mode only. ---")
+        print("W&B not configured. Training in local mode only.")
 
     # 5. Training Loop
     max_epochs = 500
-    # REMOVED: best_metric = -1 was here, causing the reset bug.
     
     print(f"Starting Training on {torch.cuda.get_device_name(0)}...")
 
@@ -67,8 +63,7 @@ def train():
             inputs, labels = batch_data["image"].to(device), batch_data["label"].to(device)
             optimizer.zero_grad()
 
-            # Updated Autocast
-            with torch.amp.autocast('cuda'):
+            with torch.amp.autocast("cuda"):
                 outputs = model(inputs)
                 loss = loss_function(outputs, labels)
 
@@ -102,11 +97,11 @@ def train():
                 wandb.log({"val_dice": metric, "epoch": epoch})
                 
                 if metric > best_metric:
-                    print(f"--- 📈 Improvement detected: {best_metric:.4f} -> {metric:.4f} ---")
+                    print(f"Validation Dice improved: {best_metric:.4f} -> {metric:.4f}")
                     best_metric = metric
                     os.makedirs("outputs", exist_ok=True)
                     torch.save(model.state_dict(), model_path)
-                    print(f"New Best Model Saved!")
+                    print("Best model saved.")
 
     wandb.finish()
 

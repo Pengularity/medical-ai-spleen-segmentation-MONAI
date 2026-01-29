@@ -4,14 +4,13 @@ from monai.transforms import ResampleToMatchd, Compose, LoadImaged, EnsureChanne
 
 def resample_to_original(image_orig_path, pred_path, output_path):
     """
-	resample the prediction to match the original image dimensions and header
+    Resample the prediction to match the original image dimensions and header.
     """
     data = {
         "image_orig": image_orig_path,
         "pred": pred_path
     }
 
-    # Load the images
     loader = Compose([
         LoadImaged(keys=["image_orig", "pred"]),
         EnsureChannelFirstd(keys=["image_orig", "pred"]),
@@ -26,14 +25,12 @@ def resample_to_original(image_orig_path, pred_path, output_path):
     )
     final_data = resampler(loaded_data)
 
-    # Save the corrected file
-    # Get the header and affine of the original image
     orig_img = nib.load(image_orig_path)
     pred_array = final_data["pred"][0].detach().cpu().numpy()
     
     new_seg = nib.Nifti1Image(pred_array, orig_img.affine, orig_img.header)
     nib.save(new_seg, output_path)
-    print(f"✅ Resampled prediction saved to: {output_path}")
+    print(f"Resampled prediction saved to: {output_path}")
 
 if __name__ == "__main__":
     resample_to_original(

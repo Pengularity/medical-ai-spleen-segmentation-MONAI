@@ -1,3 +1,7 @@
+"""
+Train/validation transforms for Task09 Spleen (CT).
+HU reference: soft tissue ~[-57, 164]; air ~-1000; bone ~+300 to +1000.
+"""
 from monai.transforms import (
     Compose,
     LoadImaged,
@@ -9,6 +13,7 @@ from monai.transforms import (
     RandCropByPosNegLabeld,
     EnsureTyped,
 )
+
 
 def get_train_transforms():
     return Compose([
@@ -22,33 +27,29 @@ def get_train_transforms():
         # 3. Standardize orientation to RAS (Right, Anterior, Superior)
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         
-        # 4. Intensity Windowing (The HU logic we discussed)
+        # 4. CT intensity window (HU) for soft tissue
         ScaleIntensityRanged(
             keys=["image"], a_min=-57, a_max=164,
             b_min=0.0, b_max=1.0, clip=True,
         ),
         
-        # 5. Remove useless black space
+        # 5. Crop to foreground
         CropForegroundd(keys=["image", "label"], source_key="image"),
-        
-        # 6. Randomly crop a 96x96x96 cube for training
-        # This ensures we get a balance of organ (pos) and background (neg)
+        # 6. Random 96³ crop (balanced pos/neg)
         RandCropByPosNegLabeld(
             keys=["image", "label"],
             label_key="label",
             spatial_size=(96, 96, 96),
-            pos=1, neg=1,
-            num_samples=4, # Your 3090 can handle more, but we'll start here
+            pos=1,
+            neg=1,
+            num_samples=4,
             image_key="image",
             image_threshold=0,
         ),
-        
-        # 7. Convert to Tensor for the GPU
         EnsureTyped(keys=["image", "label"]),
     ])
 
 def get_val_transforms():
-    # Validation doesn't need random cropping
     return Compose([
         LoadImaged(keys=["image", "label"]),
         EnsureChannelFirstd(keys=["image", "label"]),
@@ -61,15 +62,3 @@ def get_val_transforms():
         CropForegroundd(keys=["image", "label"], source_key="image"),
         EnsureTyped(keys=["image", "label"]),
     ])
-
-# In CT scans, a voxel value represents physical density, measured in Hounsfield Units (HU).
-
-   # Air: −1000 HU
-
-   # Lung: −700 to −500 HU
-
-   # Water: 0 HU
-
-   # Soft Tissue (Spleen, Liver): +30 to +150 HU
-
-   # Bone: +300 to +1000 HU
