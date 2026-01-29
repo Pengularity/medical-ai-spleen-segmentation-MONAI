@@ -61,3 +61,15 @@ def get_val_transforms():
         CropForegroundd(keys=["image", "label"], source_key="image"),
         EnsureTyped(keys=["image", "label"]),
     ])
+
+# In CT scans, a voxel value represents physical density, measured in Hounsfield Units (HU).
+
+   # Air: −1000 HU
+
+   # Lung: −700 to −500 HU
+
+   # Water: 0 HU
+
+   # Soft Tissue (Spleen, Liver): +30 to +150 HU
+
+   # Bone: +300 to +1000 HU
