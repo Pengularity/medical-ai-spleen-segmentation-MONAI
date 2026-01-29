@@ -1,0 +1,53 @@
+_wandb:
+    value:
+        cli_version: 0.24.0
+        e:
+            q91suz8i6s7h9x9pxobfzhirvwogqh14:
+                codePath: src/train.py
+                codePathLocal: src/train.py
+                cpu_count: 12
+                cpu_count_logical: 24
+                cudaVersion: "13.1"
+                disk:
+                    /:
+                        total: "1081101176832"
+                        used: "39017312256"
+                email: pengularity@gmail.com
+                executable: /home/pengu/projects/medical-ai-spleen-segmentation-MONAI/.venv/bin/python3
+                git:
+                    commit: af3d07b2708401b036874c87141a83a882da6dcc
+                    remote: https://github.com/Pengularity/medical-ai-spleen-segmentation-MONAI.git
+                gpu: NVIDIA GeForce RTX 3090
+                gpu_count: 1
+                gpu_nvidia:
+                    - architecture: Ampere
+                      memoryTotal: "25769803776"
+                      name: NVIDIA GeForce RTX 3090
+                      uuid: GPU-02991ec2-d964-60a6-aa05-64e6419c99ff
+                host: DESKTOP-0AIFO9T
+                memory:
+                    total: "12502708224"
+                os: Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39
+                program: /home/pengu/projects/medical-ai-spleen-segmentation-MONAI/src/train.py
+                python: CPython 3.10.17
+                root: /home/pengu/projects/medical-ai-spleen-segmentation-MONAI
+                startedAt: "2026-01-29T06:40:19.502187Z"
+                writerId: q91suz8i6s7h9x9pxobfzhirvwogqh14
+        m: []
+        python_version: 3.10.17
+        t:
+            "1":
+                - 1
+                - 41
+                - 48
+            "2":
+                - 1
+                - 41
+                - 48
+            "3":
+                - 2
+                - 13
+            "4": 3.10.17
+            "5": 0.24.0
+            "12": 0.24.0
+            "13": linux-x86_64
