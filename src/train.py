@@ -21,25 +21,38 @@ def train():
     data_dicts = [{"image": i, "label": l} for i, l in zip(train_images, train_labels)]
     train_files, val_files = data_dicts[:-9], data_dicts[-9:]
 
-    # 2. Loaders (Using CacheDataset for speed)
+    # 2. Loaders
     train_ds = CacheDataset(data=train_files, transform=get_train_transforms(), cache_rate=1.0)
     train_loader = DataLoader(train_ds, batch_size=2, shuffle=True, num_workers=4)
-
     val_ds = CacheDataset(data=val_files, transform=get_val_transforms(), cache_rate=1.0)
     val_loader = DataLoader(val_ds, batch_size=1, num_workers=4)
 
-    # 3. Initialize Factory Components
+    # 3. Initialize Components
     model = get_model(device)
     loss_function, dice_metric = get_loss_and_metrics()
     optimizer = get_optimizer(model.parameters())
-    scaler = torch.cuda.amp.GradScaler() # For Mixed Precision (Speed)
+    
+    # Updated Scaler
+    scaler = torch.amp.GradScaler('cuda') 
+
+    # Loading & Best Metric Logic
+    model_path = "outputs/best_model.pth"
+    best_metric = -1 # Default
+    
+    if os.path.exists(model_path):
+        print(f"--- 🧠 Loading existing knowledge from {model_path} ---")
+        model.load_state_dict(torch.load(model_path, weights_only=True))
+        best_metric = -1
+    else:
+        print("--- 🆕 No previous model found. Starting from scratch. ---")
 
     # 4. Initialize Weights & Biases
-    wandb.init(project="spleen-segmentation", name="3d-unet-resunits-v1")
+    wandb.login(key="")
+    wandb.init(project="spleen-segmentation", name="3d-unet-resunits-v1", resume="allow")
 
     # 5. Training Loop
-    max_epochs = 100
-    best_metric = -1
+    max_epochs = 500
+    # REMOVED: best_metric = -1 was here, causing the reset bug.
     
     print(f"Starting Training on {torch.cuda.get_device_name(0)}...")
 
@@ -50,8 +63,8 @@ def train():
             inputs, labels = batch_data["image"].to(device), batch_data["label"].to(device)
             optimizer.zero_grad()
 
-            # Mixed Precision Forward Pass
-            with torch.cuda.amp.autocast():
+            # Updated Autocast
+            with torch.amp.autocast('cuda'):
                 outputs = model(inputs)
                 loss = loss_function(outputs, labels)
 
@@ -72,7 +85,6 @@ def train():
                     val_inputs, val_labels = val_data["image"].to(device), val_data["label"].to(device)
                     val_outputs = sliding_window_inference(val_inputs, (96, 96, 96), 4, model)
                     
-                    # Prepare for metric
                     post_pred = AsDiscrete(argmax=True, to_onehot=2)
                     post_label = AsDiscrete(to_onehot=2)
                     
@@ -86,10 +98,11 @@ def train():
                 wandb.log({"val_dice": metric, "epoch": epoch})
                 
                 if metric > best_metric:
+                    print(f"--- 📈 Improvement detected: {best_metric:.4f} -> {metric:.4f} ---")
                     best_metric = metric
                     os.makedirs("outputs", exist_ok=True)
-                    torch.save(model.state_dict(), "outputs/best_model.pth")
-                    print(f"New Best Model! Dice: {metric:.4f}")
+                    torch.save(model.state_dict(), model_path)
+                    print(f"New Best Model Saved!")
 
     wandb.finish()
 

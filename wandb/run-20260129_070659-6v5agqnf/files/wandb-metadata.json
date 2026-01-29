@@ -1,0 +1,39 @@
+{
+  "os": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "CPython 3.10.17",
+  "startedAt": "2026-01-29T06:06:59.571792Z",
+  "program": "/home/pengu/projects/medical-ai-spleen-segmentation-MONAI/src/train.py",
+  "codePath": "src/train.py",
+  "codePathLocal": "src/train.py",
+  "git": {
+    "remote": "https://github.com/Pengularity/medical-ai-spleen-segmentation-MONAI.git",
+    "commit": "5c6ae1100d6bf43e78c552a3a9c36d25021a85b5"
+  },
+  "email": "pengularity@gmail.com",
+  "root": "/home/pengu/projects/medical-ai-spleen-segmentation-MONAI",
+  "host": "DESKTOP-0AIFO9T",
+  "executable": "/home/pengu/projects/medical-ai-spleen-segmentation-MONAI/.venv/bin/python3",
+  "cpu_count": 12,
+  "cpu_count_logical": 24,
+  "gpu": "NVIDIA GeForce RTX 3090",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "1081101176832",
+      "used": "39035613184"
+    }
+  },
+  "memory": {
+    "total": "12502708224"
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA GeForce RTX 3090",
+      "memoryTotal": "25769803776",
+      "architecture": "Ampere",
+      "uuid": "GPU-02991ec2-d964-60a6-aa05-64e6419c99ff"
+    }
+  ],
+  "cudaVersion": "13.1",
+  "writerId": "ok10cvybt13der2jpfyd9on87bit7ae9"
+}
