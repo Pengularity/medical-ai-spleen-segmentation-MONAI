@@ -44,7 +44,7 @@ Animated 3D view of a predicted spleen mask from the test set:
 
 ## Dataset
 
-- **Source:** [Medical Segmentation Decathlon – Task09 Spleen](https://drive.google.com/file/d/1jzeB1kcFLWqxND9bRx7T4b65DNlBKnQN/view)
+- **Source:** [Medical Segmentation Decathlon – Task09 Spleen](https://msd-for-monai.s3-us-west-2.amazonaws.com/Task09_Spleen.tar)
 - **Modality:** CT (3D volumes)
 - **Labels:** Binary mask (background / spleen)
 - **Split:** Training/validation (script split); test set in `imagesTs/`
@@ -61,21 +61,26 @@ medical-ai-spleen-segmentation-MONAI/
 │   ├── download_data.py   # Download Task09_Spleen
 │   ├── explore_data.py   # Visualize samples (slices + save PNG)
 │   ├── transforms.py     # Train/val data transforms (spacing, HU, crops)
-│   ├── model.py         # 3D UNet (MONAI) definition
-│   ├── train_utils.py   # Loss, metrics, optimizer
-│   ├── train.py         # Training loop + W&B + checkpointing
-│   ├── inference.py     # Sliding-window inference on imagesTs
-│   └── post_process.py  # Resample prediction to original space
+│   ├── model.py          # 3D UNet (MONAI) definition
+│   ├── train_utils.py    # Loss, metrics, optimizer
+│   ├── train.py          # Training loop + W&B + checkpointing
+│   ├── inference.py      # Sliding-window inference on imagesTs
+│   ├── post_process.py   # Resample prediction to original space
+│   └── dataset.py        # Dataset helpers (optional)
 ├── data/                 # Created by download_data.py
 │   └── Task09_Spleen/
-│       ├── imagesTr/    # Training images
-│       ├── labelsTr/    # Training labels
-│       └── imagesTs/    # Test images
+│       ├── imagesTr/     # Training images
+│       ├── labelsTr/     # Training labels
+│       └── imagesTs/     # Test images
+├── results/              # Curated results (screenshots, GIFs)
+│   └── features/
+│       ├── w&b-results.png
+│       └── monai-spleen-gif.gif
 ├── outputs/              # Created at runtime
-│   ├── best_model.pth   # Best checkpoint (val Dice)
-│   └── predictions/    # NIfTI segmentations from inference
+│   ├── best_model.pth    # Best checkpoint (val Dice)
+│   └── predictions/     # NIfTI segmentations from inference
 ├── requirements.txt
-├── check_gpu.py         # PyTorch + MONAI + CUDA check
+├── check_gpu.py          # PyTorch + MONAI + CUDA check
 └── README.md
 ```
 
@@ -155,7 +160,7 @@ Reads from `data/Task09_Spleen/imagesTs/`, uses `outputs/best_model.pth`, and wr
 
 ### 5. Post-process a prediction (optional)
 
-To resample a prediction back to the original image geometry and header:
+To resample a prediction back to the original image geometry and header (run from the `src` directory or with `PYTHONPATH` including the project root):
 
 ```python
 from post_process import resample_to_original
@@ -198,4 +203,5 @@ This project is licensed under the **MIT License** – see the [LICENSE](LICENSE
 
 - [MONAI](https://monai.io/) for medical imaging utilities and 3D UNet
 - [Medical Segmentation Decathlon](https://medicaldecathlon.com/) for the Task09 Spleen dataset
+- [MONAI Spleen Segmentation Tutorial](https://github.com/Project-MONAI/tutorials/blob/main/3d_segmentation/spleen_segmentation_3d.ipynb) for the tutorial inspiration.
 - [Weights & Biases](https://wandb.ai/) for experiment tracking
