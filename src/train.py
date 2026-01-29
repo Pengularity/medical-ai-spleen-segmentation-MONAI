@@ -46,9 +46,13 @@ def train():
     else:
         print("--- 🆕 No previous model found. Starting from scratch. ---")
 
-    # 4. Initialize Weights & Biases
-    wandb.login(key="")
-    wandb.init(project="spleen-segmentation", name="3d-unet-resunits-v1", resume="allow")
+    # 4. Initialize Weights & Biases (optional: set WANDB_API_KEY to enable logging)
+    if os.environ.get("WANDB_API_KEY"):
+        wandb.login()
+        wandb.init(project="spleen-segmentation", name="3d-unet-v1", resume="allow")
+    else:
+        wandb.init(project="spleen-segmentation", mode="disabled")
+        print("--- ⚠️ W&B non configuré. Entraînement en mode local uniquement. ---")
 
     # 5. Training Loop
     max_epochs = 500
