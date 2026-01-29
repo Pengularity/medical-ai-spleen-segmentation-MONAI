@@ -52,7 +52,7 @@ def train():
         wandb.init(project="spleen-segmentation", name="3d-unet-v1", resume="allow")
     else:
         wandb.init(project="spleen-segmentation", mode="disabled")
-        print("--- ⚠️ W&B non configuré. Entraînement en mode local uniquement. ---")
+        print("--- ⚠️ W&B not configured. Training in local mode only. ---")
 
     # 5. Training Loop
     max_epochs = 500

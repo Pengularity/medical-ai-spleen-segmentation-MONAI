@@ -142,7 +142,7 @@ python src/train.py
 
 - **Outputs:** `outputs/best_model.pth` (best model by validation Dice)  
 - **Config:** 500 epochs, batch size 2, sliding-window validation every 2 epochs.  
-- **W&B:** If the `WANDB_API_KEY` environment variable is set (or you ran `wandb login`), training metrics are sent to Weights & Biases. Otherwise, W&B runs in **disabled** mode and a warning is printed: *« W&B non configuré. Entraînement en mode local uniquement. »* — training continues normally without remote logging.  
+- **W&B:** If the `WANDB_API_KEY` environment variable is set (or you ran `wandb login`), training metrics are sent to Weights & Biases. Otherwise, W&B runs in **disabled** mode and a warning is printed: *« W&B not configured. Training in local mode only »* — training continues normally without remote logging.  
   To enable W&B: `export WANDB_API_KEY=your_key` (or add it to a `.env` file and load it before running).
 
 ### 4. Run inference
