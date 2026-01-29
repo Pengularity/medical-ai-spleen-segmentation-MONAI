@@ -86,7 +86,7 @@ medical-ai-spleen-segmentation-MONAI/
 ### 1. Clone and enter the project
 
 ```bash
-git clone https://github.com/<username>/medical-ai-spleen-segmentation-MONAI.git
+git clone https://github.com/pengularity/medical-ai-spleen-segmentation-MONAI.git
 cd medical-ai-spleen-segmentation-MONAI
 ```
 
