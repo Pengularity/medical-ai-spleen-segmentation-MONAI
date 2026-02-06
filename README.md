@@ -65,6 +65,7 @@ medical-ai-spleen-segmentation-MONAI/
 │   ├── train_utils.py    # Loss, metrics, optimizer
 │   ├── train.py          # Training loop + W&B + checkpointing
 │   ├── inference.py      # Sliding-window inference on imagesTs
+│   ├── inference.cpp     # C++ ONNX Runtime inference (optional)
 │   ├── post_process.py   # Resample prediction to original space
 │   └── dataset.py        # Dataset helpers (optional)
 ├── data/                 # Created by download_data.py
@@ -78,7 +79,10 @@ medical-ai-spleen-segmentation-MONAI/
 │       └── monai-spleen-gif.gif
 ├── outputs/              # Created at runtime
 │   ├── best_model.pth    # Best checkpoint (val Dice)
+│   ├── model_spleen.onnx # Exported ONNX model (from export_onnx.py)
 │   └── predictions/     # NIfTI segmentations from inference
+├── export_onnx.py       # Export PyTorch model to ONNX (Opset 12)
+├── validate_onnx.py     # Cross-validate ONNX vs PyTorch outputs
 ├── requirements.txt
 ├── check_gpu.py          # PyTorch + MONAI + CUDA check
 └── README.md
@@ -178,6 +182,58 @@ Or run the example in `post_process.py`:
 python src/post_process.py
 ```
 
+### 6. Export to ONNX (optional)
+
+After training, export the model for use with ONNX Runtime, TensorRT, etc.:
+
+```bash
+python export_onnx.py
+```
+
+Writes `outputs/model_spleen.onnx` (Opset 12, input/output names `input` / `output`). Requires `outputs/best_model.pth`.
+
+### 7. Validate ONNX vs PyTorch (optional)
+
+Check that the ONNX model matches PyTorch predictions (max difference &lt; 0.01):
+
+```bash
+pip install onnxruntime   # or onnxruntime-gpu for CUDA
+python validate_onnx.py
+```
+
+Requires `outputs/best_model.pth` and `outputs/model_spleen.onnx`.
+
+### 8. C++ inference (optional)
+
+A minimal C++ inference example using the ONNX Runtime C++ API is in `src/inference.cpp`. It expects `outputs/model_spleen.onnx` and an ONNX Runtime SDK (e.g. [onnxruntime-linux-x64-gpu-1.16.3](https://github.com/microsoft/onnxruntime/releases) for GPU, or the CPU package).
+
+**Build** (from project root, adjust paths to your ONNX Runtime install):
+
+```bash
+g++ src/inference.cpp -o inference_cpp \
+    -I onnxruntime-linux-x64-gpu-1.16.3/include \
+    -L onnxruntime-linux-x64-gpu-1.16.3/lib \
+    -lonnxruntime -std=c++17
+```
+
+**Run** (so the loader finds `libonnxruntime_providers_shared.so` and CUDA libs):
+
+```bash
+LD_LIBRARY_PATH=$(pwd)/onnxruntime-linux-x64-gpu-1.16.3/lib ./inference_cpp
+```
+
+For CPU-only, use the CPU ONNX Runtime package and remove the CUDA provider from `inference.cpp` (or use the CPU build and do not call `AppendExecutionProvider_CUDA`).
+
+---
+
+## 🚀 Deployment & Optimization
+
+To bridge the gap between research and production, this project includes a complete C++ inference pipeline.
+
+* **ONNX Export:** The PyTorch model is exported to ONNX (Opset 12) for interoperability (`export_onnx.py`).
+* **Numerical Validation:** A cross-validation script (`validate_onnx.py`) ensures the exported model maintains a max difference &lt; 0.01 compared to PyTorch predictions.
+* **C++ Inference:** A low-latency inference prototype using **ONNX Runtime C++ API** is provided in `src/inference.cpp` (see Usage step 8 for build and run).
+
 ---
 
 ## Configuration Summary
@@ -203,5 +259,6 @@ This project is licensed under the **MIT License** – see the [LICENSE](LICENSE
 
 - [MONAI](https://monai.io/) for medical imaging utilities and 3D UNet
 - [Medical Segmentation Decathlon](https://medicaldecathlon.com/) for the Task09 Spleen dataset
-- [MONAI Spleen Segmentation Tutorial](https://github.com/Project-MONAI/tutorials/blob/main/3d_segmentation/spleen_segmentation_3d.ipynb) for the tutorial inspiration.
+- [MONAI Spleen Segmentation Tutorial](https://github.com/Project-MONAI/tutorials/blob/main/3d_segmentation/spleen_segmentation_3d.ipynb) for the tutorial inspiration
 - [Weights & Biases](https://wandb.ai/) for experiment tracking
+- [ONNX Runtime](https://onnxruntime.ai/) for the C++ inference pipeline and ONNX validation
