@@ -1,5 +1,7 @@
 # 3D Spleen Segmentation with MONAI
 
+A robust Deep Learning pipeline designed for clinical-grade spleen segmentation, bridging the gap between PyTorch research and C++ production environments
+
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.5+-ee4c2c.svg)](https://pytorch.org/)
 [![MONAI](https://img.shields.io/badge/MONAI-1.5+-8888ff.svg)](https://monai.io/)
