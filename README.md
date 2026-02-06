@@ -228,7 +228,7 @@ For CPU-only, use the CPU ONNX Runtime package and remove the CUDA provider from
 
 ---
 
-## 🚀 Deployment & Optimization
+## Deployment & Optimization (Bonus)
 
 To bridge the gap between research and production, this project includes a complete C++ inference pipeline.
 
