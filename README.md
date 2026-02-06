@@ -5,6 +5,10 @@ A robust Deep Learning pipeline designed for clinical-grade spleen segmentation,
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.5+-ee4c2c.svg)](https://pytorch.org/)
 [![MONAI](https://img.shields.io/badge/MONAI-1.5+-8888ff.svg)](https://monai.io/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com/)
+[![Docker](https://img.shields.io/badge/Docker-24+-2496ed.svg)](https://www.docker.com/)
+[![ONNX Runtime](https://img.shields.io/badge/ONNX%20Runtime-1.16+-00599C.svg)](https://onnxruntime.ai/)
+[![C++](https://img.shields.io/badge/C%2B%2B-17-00599C.svg)](https://isocpp.org/)
 [![CUDA](https://img.shields.io/badge/CUDA-12.1+-76b900.svg)](https://developer.nvidia.com/cuda-toolkit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -20,6 +24,8 @@ End-to-end 3D semantic segmentation of the spleen from abdominal CT scans using 
 | **Loss** | Dice Loss (class-imbalance friendly) |
 | **Optimization** | Adam, Automatic Mixed Precision (AMP) |
 | **Inference** | Sliding-window 3D prediction |
+| **API** | [FastAPI](https://fastapi.tiangolo.com/) REST API for NIfTI upload → ONNX inference |
+| **Deployment** | Docker image (Python 3.11-slim, Uvicorn on port 8000) |
 | **Monitoring** | [Weights & Biases](https://wandb.ai/) (optional) |
 | **Post-processing** | Resample predictions to original image geometry |
 
@@ -68,6 +74,7 @@ medical-ai-spleen-segmentation-MONAI/
 │   ├── train.py          # Training loop + W&B + checkpointing
 │   ├── inference.py      # Sliding-window inference on imagesTs
 │   ├── inference.cpp     # C++ ONNX Runtime inference (optional)
+│   ├── app.py            # FastAPI app: POST /predict with NIfTI upload
 │   ├── post_process.py   # Resample prediction to original space
 │   └── dataset.py        # Dataset helpers (optional)
 ├── data/                 # Created by download_data.py
@@ -85,6 +92,8 @@ medical-ai-spleen-segmentation-MONAI/
 │   └── predictions/     # NIfTI segmentations from inference
 ├── export_onnx.py       # Export PyTorch model to ONNX (Opset 12)
 ├── validate_onnx.py     # Cross-validate ONNX vs PyTorch outputs
+├── Dockerfile           # Docker image for FastAPI (Python 3.11-slim)
+├── .dockerignore
 ├── requirements.txt
 ├── check_gpu.py          # PyTorch + MONAI + CUDA check
 └── README.md
@@ -226,15 +235,41 @@ LD_LIBRARY_PATH=$(pwd)/onnxruntime-linux-x64-gpu-1.16.3/lib ./inference_cpp
 
 For CPU-only, use the CPU ONNX Runtime package and remove the CUDA provider from `inference.cpp` (or use the CPU build and do not call `AppendExecutionProvider_CUDA`).
 
+### 9. Run the FastAPI API (optional)
+
+A REST API in `src/app.py` exposes **POST /predict**: upload a NIfTI (`.nii.gz`) CT volume; the app preprocesses it (LoadImage, HU window [-57, 164], resize to 96×96×96), runs ONNX inference, and returns JSON with `filename`, `detected_spleen_voxels`, `has_spleen`, and `inference_engine`.
+
+**Prerequisite:** `outputs/model_spleen.onnx` must exist (run `python export_onnx.py` first).
+
+**Local run** (from project root, so `src` is importable):
+
+```bash
+uvicorn src.app:app --host 0.0.0.0 --port 8000
+```
+
+Then open http://localhost:8000/docs for Swagger UI and try **POST /predict** with a NIfTI file.
+
+**Docker run:**
+
+Build (ensure `outputs/model_spleen.onnx` exists; the Dockerfile copies it into the image):
+
+```bash
+docker build -t spleen-seg-api .
+docker run -p 8000:8000 spleen-seg-api
+```
+
+API is available at http://localhost:8000. Use **POST /predict** with a NIfTI file as form body.
+
 ---
 
 ## Deployment & Optimization (Bonus)
 
-To bridge the gap between research and production, this project includes a complete C++ inference pipeline.
+To bridge the gap between research and production, this project includes:
 
 * **ONNX Export:** The PyTorch model is exported to ONNX (Opset 12) for interoperability (`export_onnx.py`).
 * **Numerical Validation:** A cross-validation script (`validate_onnx.py`) ensures the exported model maintains a max difference &lt; 0.01 compared to PyTorch predictions.
-* **C++ Inference:** A low-latency inference prototype using **ONNX Runtime C++ API** is provided in `src/inference.cpp` (see Usage step 8 for build and run).
+* **FastAPI + Docker:** A REST API (`src/app.py`) for NIfTI upload and ONNX inference, with a `Dockerfile` for containerized deployment (see Usage step 9).
+* **C++ Inference:** A low-latency inference prototype using **ONNX Runtime C++ API** in `src/inference.cpp` (see Usage step 8 for build and run).
 
 ---
 
