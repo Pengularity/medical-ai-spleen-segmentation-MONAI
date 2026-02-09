@@ -13,12 +13,15 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy of code source and model
+# Copy source and install package
 COPY src/ src/
-COPY outputs/model_spleen.onnx outputs/model_spleen.onnx
+COPY api/ api/
+COPY pyproject.toml .
+RUN pip install -e .
 
-# Exposition of port
+# Copy model (must exist; run export_onnx first or mount at runtime)
+COPY outputs/ outputs/
+
 EXPOSE 8000
 
-# Command to launch
-CMD ["uvicorn", "src.app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "8000"]

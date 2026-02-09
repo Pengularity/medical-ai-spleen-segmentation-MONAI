@@ -210,8 +210,10 @@ __marimo__/
 data/
 outputs/
 *.pth
-*.nii.gzonnxruntime-linux-x64-gpu-1.16.3/
+*.nii.gz
+onnxruntime-linux-x64-gpu-*/
 inference_cpp
-onnxruntime-linux-x64-gpu-1.16.3/
+*.engine
 *.tar.gz
 *.tgz
+.python-version

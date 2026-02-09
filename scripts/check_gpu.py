@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+"""Check PyTorch, MONAI, and CUDA availability."""
+
+import torch
+import monai
+
+print("--- System diagnostic ---")
+print(f"PyTorch: {torch.__version__}")
+print(f"MONAI: {monai.__version__}")
+print(f"CUDA: {torch.cuda.is_available()}")
+if torch.cuda.is_available():
+    print(f"GPU: {torch.cuda.get_device_name(0)}")
+    print(f"Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
+else:
+    print("WARNING: CUDA not detected. Check NVIDIA drivers.")
